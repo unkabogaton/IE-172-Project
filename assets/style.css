@@ -1,0 +1,11 @@
+/* File: assets/style.css */
+
+.tab-active {
+    background-color: #555;  /* Active tab background */
+    color: white;  /* Active tab text color */
+}
+
+.tab {
+    background-color: #333;  /* Inactive tab background */
+    color: #fff;  /* Inactive tab text color */
+}

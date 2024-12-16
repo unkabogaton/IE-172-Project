@@ -1,0 +1,17 @@
+/* assets/custom.css
+
+/* Custom styles for active sidebar links */
+/* .nav-link.active {
+    border: 1px solid #d4d1d1 !important;  /* Add border with custom color */
+    /* color: #ffffff !important;  Ensure text color changes */
+    /* font-weight: bold !important;  Make text bold */
+/* } 
+/* 
+.nav-link.active:hover {
+    border-color: #d4d1d1 !important;  /* Change border color on hover */
+/* } 
+
+/* Optional: Add custom border when link is not active */
+/* .nav-link { */
+    /* border: 1px solid transparent; */
+/* } 
