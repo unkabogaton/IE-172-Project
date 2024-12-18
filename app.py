@@ -1,7 +1,6 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output
 import webbrowser
 
 app = dash.Dash(__name__, title='Sineflix Movie Theater', use_pages=True, external_stylesheets=[dbc.themes.SLATE])
@@ -26,29 +25,15 @@ sidebar = dbc.Nav(
 
 # Layout setup
 app.layout = dbc.Container([
-    # First Row for logo
-    dbc.Row([
-        dbc.Col(
-            [
-                html.Img(src='assets/logo.png', height="80px")  # Logo image
-            ], 
+    dbc.Row([ 
+        dbc.Col([html.Img(src='assets/logo.png', height="80px")], 
         ),
     ], className='bg-primary mb-4 mx-1 p-1 rounded-3', style={'height': '90px '}),
 
-    # Main content layout with sidebar
     dbc.Row(
         [
-            dbc.Col(
-                [
-                    sidebar
-                ], width=2
-            ),
-
-            dbc.Col(
-                [
-                    dash.page_container
-                ], width=10
-            )
+            dbc.Col([sidebar], width=2),
+            dbc.Col([dash.page_container], width=10)
         ]
     )
 ], fluid=True)
