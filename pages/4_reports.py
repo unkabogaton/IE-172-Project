@@ -1,86 +1,108 @@
 import dash
 from dash import dcc, html
 import plotly.graph_objects as go
+import pandas as pd
+from database import fetch_data
 
 dash.register_page(__name__, name="Reports")
 
-# Mock Data
-top_movies = [
-    {"title": "Top Gun: Maverick", "rating": "8.3", "description": "High-flying action sequel."},
-    {"title": "Oppenheimer", "rating": "8.8", "description": "Historical drama about the atomic bomb."},
-    {"title": "The Batman", "rating": "8.2", "description": "Dark, gritty superhero story."},
-    {"title": "Everything Everywhere All at Once", "rating": "8.1", "description": "Multiverse-spanning adventure."},
-]
-ticket_sales = [5000, 4500, 3000, 4000]
-annual_expenses = [100000, 120000, 110000, 105000]
-annual_revenues = [200000, 220000, 210000, 215000]
-new_members = [300, 320, 310, 340]
+# Fetch Data
+reports = fetch_data('reports')
+top_movies = fetch_data('movies', '*', None, 'ratings', 'DESC', 4)
 
-# Common Theme for Charts
+# Data Processing
+reports_df = pd.DataFrame(reports)
+years = reports_df['year'].tolist()
+annual_revenues = reports_df['annual_revenue'].tolist()
+new_members = reports_df['new_members'].tolist()
+annual_expenses = reports_df['annual_expenses'].tolist()
+
+ticket_sales = [5000, 4500, 3000, 4000]
+
+# Common Theme for Dark Aesthetic Charts with Updated Font
 chart_theme = {
-    "plot_bgcolor": "#333333",
-    "paper_bgcolor": "#333333",
-    "font": {"color": "#FFFFFF"}
+    "plot_bgcolor": "#000000",  # Black background
+    "paper_bgcolor": "#000000",
+    "font": {"color": "#FFFFFF", "family": "Poppins, sans-serif"},  # Modern Poppins font
+    "title_x": 0.5,  # Center-align titles
+    "xaxis": {"showgrid": True, "gridcolor": "#444444", "linecolor": "#FFFFFF"},
+    "yaxis": {"showgrid": True, "gridcolor": "#444444", "linecolor": "#FFFFFF"}
 }
 
-# Ticket Sales Chart
-ticket_sales_chart = go.Figure(
+# Ticket Sales Chart with Updated Colors
+ticket_sales_chart = go.Figure()
+ticket_sales_chart.add_trace(
     go.Bar(
         x=[movie["title"] for movie in top_movies],
         y=ticket_sales,
-        marker_color=["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"],
+        marker=dict(
+            color=["#E63946", "#E63946", "#6E6E6E", "#C4C4C4"],  # Red and gray shades
+            line=dict(width=0)
+        ),
+        width=0.5
     )
 )
+ticket_sales_chart.update_traces(marker_line_width=1, marker_line_color="#FFFFFF")
 ticket_sales_chart.update_layout(
-    title="Ticket Sales by Movie",
+    title="Ticket Sales by Movie 🎟️",
     xaxis_title="Movies",
     yaxis_title="Tickets Sold",
-    height=300,
-    margin=dict(t=40, b=40),
+    height=350,
+    margin=dict(t=60, b=60),
     **chart_theme
 )
 
-# Annual Expenses vs. Revenues Chart
-expenses_revenue_chart = go.Figure()
-expenses_revenue_chart.add_trace(go.Bar(x=["2021", "2022", "2023", "2024"], y=annual_expenses, name="Expenses"))
-expenses_revenue_chart.add_trace(go.Bar(x=["2021", "2022", "2023", "2024"], y=annual_revenues, name="Revenue"))
-expenses_revenue_chart.update_layout(
-    title="Annual Expenses vs. Revenues",
+# Annual Expenses vs Revenues Chart with Updated Colors
+expenses_vs_revenues = go.Figure()
+expenses_vs_revenues.add_trace(
+    go.Bar(
+        x=years, y=annual_expenses,
+        name="Expenses",
+        marker=dict(color="#E63946", opacity=0.8)  # Red
+    )
+)
+expenses_vs_revenues.add_trace(
+    go.Bar(
+        x=years, y=annual_revenues,
+        name="Revenue",
+        marker=dict(color="#6E6E6E", opacity=0.8)  # Gray
+    )
+)
+expenses_vs_revenues.update_layout(
+    title="Annual Expenses vs. Revenues 💼",
     xaxis_title="Year",
     yaxis_title="Amount ($)",
     barmode="group",
-    height=300,
-    margin=dict(t=40, b=40),
+    height=350,
+    margin=dict(t=60, b=60),
     **chart_theme
 )
 
-# New Members Chart
-new_members_chart = go.Figure(
+# New Members Chart with Updated Colors
+new_members_chart = go.Figure()
+new_members_chart.add_trace(
     go.Scatter(
         x=["Q1", "Q2", "Q3", "Q4"],
         y=new_members,
-        marker=dict(color="#9467bd"),
         mode="lines+markers",
+        marker=dict(size=10, color="#E63946"),  # Red markers
+        line=dict(width=3, color="#C4C4C4")  # Gray line
     )
 )
 new_members_chart.update_layout(
-    title="New Members per Quarter",
+    title="New Members per Quarter 📈",
     xaxis_title="Quarter",
-    yaxis_title="Number of New Members",
-    height=300,
-    margin=dict(t=40, b=40),
+    yaxis_title="New Members",
+    height=350,
+    margin=dict(t=60, b=80, l=80, r=80),  # Extra padding for better spacing
     **chart_theme
 )
 
-# Layout with Tabs
+# Layout for Reports Page
 layout = html.Div(
     [
         # Header
-        html.H1(
-            "Reports Overview",
-            className="text-light fw-bold fs-1 text-center",
-            style={'margin-bottom': '20px'}
-        ),
+        html.H1("Reports Overview", className="fs-1 text-center mb-4"),
 
         # Tabs
         dcc.Tabs(
@@ -91,15 +113,15 @@ layout = html.Div(
                 dcc.Tab(label='Ticket Sales Analysis', value='tab-2'),
                 dcc.Tab(label='Statistics & Graphs', value='tab-3'),
             ],
-            style={"background-color": "#333333", "color": "#FFFFFF"},
+            className="dcc-tabs"
         ),
 
         # Tab Content
-        html.Div(id='reports-tabs-content', className="text-light")
+        html.Div(id='reports-tabs-content')
     ]
 )
 
-# Callback to update tab content
+# Callback for Tabs
 @dash.callback(
     dash.Output('reports-tabs-content', 'children'),
     [dash.Input('reports-tabs', 'value')]
@@ -108,54 +130,53 @@ def render_tab_content(tab):
     if tab == 'tab-1':
         return html.Div(
             [
-                html.H2("Top Movies", className="text-light fw-bold fs-3 text-center"),
+                html.H2("Top Movies", className="section-title"),
                 html.Div(
                     [
                         html.Div(
                             [
-                                html.H4(movie["title"], className="text-light fw-bold"),
-                                html.P(f"Rating: {movie['rating']}", className="text-muted"),
-                                html.P(movie["description"], className="text-light"),
+                                html.Img(
+                                    src=movie["link_to_pictures"],
+                                    alt=movie["title"],
+                                    className="img-fluid"
+                                ),
+                                html.H4(movie["title"]),
+                                html.P(f"⭐ Rating: {movie['ratings']}", className="rating"),
+                                html.P(movie["description"], className="text-muted"),
                             ],
-                            className="border border-light rounded p-3 mb-3",
-                            style={"width": "22%", "display": "inline-block", "margin": "10px"},
+                            className="movie-card"
                         )
                         for movie in top_movies
                     ],
-                    style={"text-align": "center"}
+                    className="movie-grid"
                 ),
             ],
-            style={'margin-bottom': '20px'}
+            className="section-wrapper"
         )
     elif tab == 'tab-2':
         return html.Div(
             [
-                html.H2("Ticket Sales Analysis", className="text-light fw-bold fs-3 text-center"),
-                dcc.Graph(figure=ticket_sales_chart),
+                html.H2("Ticket Sales Analysis", className="section-title"),
+                dcc.Graph(figure=ticket_sales_chart)
             ],
-            style={'margin-bottom': '20px'}
+            className="section-wrapper"
         )
     elif tab == 'tab-3':
         return html.Div(
             [
-                html.H2("Statistics, Graphs & Data Analysis", className="text-light fw-bold fs-3 text-center"),
-
-                # Annual Expenses vs. Revenues Chart
+                html.H2("Statistics & Graphs", className="section-title"),
                 html.Div(
                     [
-                        html.H3("Annual Expenses vs. Revenues", className="text-light fw-bold fs-4 text-center"),
-                        dcc.Graph(figure=expenses_revenue_chart),
-                    ],
-                    style={'margin-bottom': '20px'}
-                ),
-
-                # New Members Chart
-                html.Div(
-                    [
-                        html.H3("New Members per Quarter", className="text-light fw-bold fs-4 text-center"),
-                        dcc.Graph(figure=new_members_chart),
+                        html.H3("Annual Expenses vs. Revenues", className="section-title"),
+                        dcc.Graph(figure=expenses_vs_revenues)
                     ]
                 ),
+                html.Div(
+                    [
+                        html.H3("New Members per Quarter", className="section-title"),
+                        dcc.Graph(figure=new_members_chart)
+                    ]
+                )
             ],
-            style={'margin-bottom': '20px'}
+            className="section-wrapper"
         )
